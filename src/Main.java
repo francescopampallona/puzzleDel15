@@ -15,7 +15,7 @@ public class Main {
         System.out.println("Scegli:");
         System.out.println("1) Prova a risolvere tu");
         System.out.println("2) Risolvi con algoritmo di ricerca A*");
-
+        System.out.println("3) Risolvi con il simulated annealing");
         Scanner scanner = new Scanner(System.in);
         String scelta = scanner.nextLine();
 
@@ -23,6 +23,8 @@ public class Main {
             game(statoIniziale);
         } else if (scelta.equals("2")) {
             aStarSearch(statoIniziale);
+        }else if(scelta.equals("3")){
+             simulatedAnnealing(statoIniziale);
         }
     }
 
@@ -161,6 +163,63 @@ public class Main {
             }
         }
         System.out.println("Impossibile trovare la soluzione.");
+    }
+
+    //Non trova la soluzione ottima ma richiede meno risorse in termini di tempo CPU e memoria
+    public static void simulatedAnnealing(int[][] statoIniziale){
+        double fattore_raffreddamento = 0.99995;
+        double temperatura = 400;
+        int[][] stato = statoIniziale;
+        String[] mosse = {"w", "a", "s", "d"};
+        double deltaE;
+        int i=0;
+        int abbassamentiDiTemperatura=0;
+        while(!obiettivoRaggiunto(stato)){
+            temperatura = temperatura * fattore_raffreddamento;
+            abbassamentiDiTemperatura+=1;
+
+            if(temperatura<1e-300){
+                System.out.println("FALLIMENTO! TEMPERATURA: "+ temperatura+ " ABBASSAMENTI DI TEMPERATURA: "+abbassamentiDiTemperatura);
+                return;
+            }
+            String mossaCasuale = scegliMossaCasuale(mosse);
+            int[][] statoNuovo = compiAzione(mossaCasuale, stato);
+            int distanzaManhattanStatoNuovo= calcoloDistanzaManhattan(statoNuovo);
+            deltaE= calcoloDistanzaManhattan(stato)-distanzaManhattanStatoNuovo;
+            if(deltaE>0){
+                i++;
+                stato = statoNuovo;
+                System.out.println(String.format("MOSSA %d: %s , DISTANZA MANHATTAN: %d",i,mossaCasuale, distanzaManhattanStatoNuovo));
+                mostraStato(stato);
+            }
+            else if(deltaE<0){
+                double probabilitaScelta= Math.exp(deltaE / temperatura);
+                if(scegliConProbabilita(probabilitaScelta)){
+                    i++;
+                    stato = statoNuovo;
+                    System.out.println(String.format("MOSSA %d: %s, DISTANZA MANHATTAN: %d, SCELTA CON PROBABILITA: e^(deltaE/T)=%f, dove deltaE=%f e T=%f",i,mossaCasuale, distanzaManhattanStatoNuovo, probabilitaScelta, deltaE, temperatura));
+                    mostraStato(stato);
+                }
+            }
+
+        }
+        System.out.println("OBIETTIVO RAGGIUNTO!");
+    }
+
+    public static String scegliMossaCasuale(String[] mosse) {
+        Random random = new Random();
+        int indiceCasuale = random.nextInt(mosse.length); // Genera un indice casuale tra 0 e mosse.length - 1
+        return mosse[indiceCasuale];
+    }
+
+    public static boolean scegliConProbabilita(double probabilita) {
+
+        // Genera un numero casuale uniforme tra 0 e 1
+        Random random = new Random();
+        double casuale = random.nextDouble(); // Valore tra 0.0 e 1.0
+
+        // Verifica se il numero casuale è inferiore alla probabilità
+        return casuale < probabilita;
     }
 
     public static String statoToString(int[][] stato) {
