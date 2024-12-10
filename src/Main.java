@@ -131,7 +131,7 @@ public class Main {
         PriorityQueue<Nodo> coda = new PriorityQueue<>();
         Set<String> statiVisitati = new HashSet<>();
 
-        coda.add(new Nodo(statoIniziale, 0, calcoloDistanzaManhattan(statoIniziale), new ArrayList<>()));
+        coda.add(new Nodo(statoIniziale, 0, calcoloDistanzaManhattan(statoIniziale), new ArrayList<>(), new ArrayList<>()));
         statiVisitati.add(statoToString(statoIniziale));
 
         while (!coda.isEmpty()) {
@@ -141,8 +141,8 @@ public class Main {
                 System.out.println("OBIETTIVO RAGGIUNTO IN " + nodo.percorso.size() + " MOSSE!");
                 for (int i = 0; i < nodo.percorso.size(); i++) {
                     System.out.println("Mossa " + (i + 1) + ": " + nodo.percorso.get(i));
+                    mostraStato(nodo.statiAttraversati.get(i));
                 }
-                mostraStato(nodo.stato);
                 return;
             }
 
@@ -153,8 +153,10 @@ public class Main {
                 if (!statiVisitati.contains(statoStringa)) {
                     statiVisitati.add(statoStringa);
                     List<String> nuovoPercorso = new ArrayList<>(nodo.percorso);
+                    List<int[][]> nuovoPercorsoStati = new ArrayList<>(nodo.statiAttraversati);
                     nuovoPercorso.add(mossa);
-                    coda.add(new Nodo(statoNuovo, nodo.costo + 1, nodo.costo + 1 + calcoloDistanzaManhattan(statoNuovo), nuovoPercorso));
+                    nuovoPercorsoStati.add(statoNuovo);
+                    coda.add(new Nodo(statoNuovo, nodo.costo + 1, nodo.costo + 1 + calcoloDistanzaManhattan(statoNuovo), nuovoPercorso, nuovoPercorsoStati));
                 }
             }
         }
@@ -191,11 +193,14 @@ public class Main {
         int stimaTotale;
         List<String> percorso;
 
-        public Nodo(int[][] stato, int costo, int stimaTotale, List<String> percorso) {
+        List<int[][]> statiAttraversati;
+
+        public Nodo(int[][] stato, int costo, int stimaTotale, List<String> percorso, List<int[][]> statiAttraversati) {
             this.stato = copiaStato(stato);
             this.costo = costo;
             this.stimaTotale = stimaTotale;
             this.percorso = percorso;
+            this.statiAttraversati= statiAttraversati;
         }
 
         @Override
