@@ -168,17 +168,21 @@ public class Main {
     //Non trova la soluzione ottima ma richiede meno risorse in termini di tempo CPU e memoria
     public static void simulatedAnnealing(int[][] statoIniziale){
         double fattore_raffreddamento = 0.99995;
-        double temperatura = 400;
+        double temperatura = 500;
         int[][] stato = statoIniziale;
         String[] mosse = {"w", "a", "s", "d"};
         double deltaE;
         int i=0;
+        int maxIterations=100000000;
         int abbassamentiDiTemperatura=0;
         while(!obiettivoRaggiunto(stato)){
-            temperatura = temperatura * fattore_raffreddamento;
+            temperatura*=fattore_raffreddamento;
             abbassamentiDiTemperatura+=1;
+            if(abbassamentiDiTemperatura%10000==0){
+                temperatura*=1.5;
+            }
 
-            if(temperatura<1e-300){
+            if(abbassamentiDiTemperatura>maxIterations){
                 System.out.println("FALLIMENTO! TEMPERATURA: "+ temperatura+ " ABBASSAMENTI DI TEMPERATURA: "+abbassamentiDiTemperatura);
                 return;
             }
